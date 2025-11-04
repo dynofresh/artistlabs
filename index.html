@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynotic Artists</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Outfit",sans-serif;}
+html,body{
+  height:100%;
+  width:100%;
+  background:linear-gradient(160deg,#3b0764,#6d28d9,#7e22ce);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  color:#f5f3ff;
+  overflow-x:hidden;
+}
+h1{
+  margin:25px 0;
+  font-size:clamp(2rem,6vw,3rem);
+  text-align:center;
+  text-shadow:0 0 10px rgba(0,0,0,0.25);
+}
+.search-box{
+  width:90%;
+  max-width:420px;
+  border-radius:18px;
+  padding:12px 18px;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.2);
+  box-shadow:0 0 8px rgba(0,0,0,0.15);
+  margin-bottom:20px;
+  transition:all 0.3s ease;
+}
+.search-box input{
+  width:100%;
+  border:none;
+  outline:none;
+  background:transparent;
+  color:#fff;
+  font-size:1rem;
+  padding:8px 0;
+}
+.list-container{
+  width:90%;
+  max-width:420px;
+  flex-grow:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+ul{list-style:none;padding:0;margin:0;}
+li{
+  height:50px;
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.15);
+  font-weight:600;
+  margin-bottom:8px;
+  transition:background 0.25s ease;
+}
+li:hover{
+  background:rgba(255,255,255,0.2);
+}
+li a{text-decoration:none;color:#fff;width:100%;display:block;}
+li mark{
+  background:rgba(196,181,253,0.5);
+  border-radius:4px;
+  color:#fff;
+}
+.no-result{
+  text-align:center;
+  margin-top:20px;
+  color:#f0a;
+  display:none;
+}
+.pagination{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin:15px 0;
+}
+.pagination button{
+  cursor:pointer;
+  padding:8px 18px;
+  border-radius:14px;
+  background: rgba(255,255,255,0.2);
+  color:#fff;
+  font-weight:600;
+  border:1px solid rgba(255,255,255,0.3);
+  box-shadow:0 0 10px rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.25s ease;
+}
+.pagination button:hover{
+  background: rgba(255,255,255,0.35);
+  box-shadow: 0 0 15px rgba(255,255,255,0.3);
+  transform: scale(1.05);
+}
+.pagination button:disabled{
+  opacity:0.4;
+  cursor:not-allowed;
+  background: rgba(255,255,255,0.1);
+  box-shadow: none;
+}
+footer{
+  padding:15px 10px;
+  font-size:0.85rem;
+  color: rgba(255,255,255,0.6);
+  text-align:center;
+}
+
+/* Loading Anime GIF */
+#loadingAnime{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.7);
+  display:flex;justify-content:center;align-items:center;
+  flex-direction:column;
+  z-index:9999;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.4s ease;
+}
+#loadingAnime img{
+  width:150px;
+  height:150px;
+  margin-bottom:15px;
+}
+#loadingAnime span{
+  font-size:1.5rem;
+  color:#fff;
+  font-weight:700;
+}
+</style>
+</head>
+<body>
+
+<div id="loadingAnime">
+  <img src="https://i.imgur.com/897ShGy.gif" alt="Anime Joget">
+  <span>Loading...</span>
+</div>
+
+<h1>Search Your Artist</h1>
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="Cari nama artis...">
+</div>
+
+<div class="list-container">
+  <ul id="artistList"></ul>
+</div>
+<p class="no-result" id="noResult">Artis tidak ditemukan.</p>
+
+<div class="pagination">
+  <button id="prevBtn">Previous</button>
+  <button id="nextBtn">Next</button>
+</div>
+
+<footer>© 2025 Dynotic ID</footer>
+
+<script>
+let artists = [
+"ABIL Tramaker","ALFIN FVNKY","Ayuz Fvnky","Bngnil Porects","Derill Nine",
+"Darna Fvnky","Darna Gvnby","Fany Carsello","Febri DTM","Ganz Neverdie","HAMX7TEEN",
+"Hndra SOPAN","ILHAM RMX SG","Ilham Sopan Rmx","Itsme Ilham","Ihzan Sopan",
+"Iyanz`Wolf","Shraa NeverDIE","SRVLR RMX",
+"SUKAPARTY","XDYNZ","ZANVIR","ZallETM","Zanrmx","Zan Fvnky Rmx","gfrxP",
+"heyDarryl","It'smefajar","i5vR Rmx"
+];
+artists.sort((a,b)=>a.toLowerCase().localeCompare(b.toLowerCase()));
+
+const itemsPerPage = 10;
+let currentPage = 1;
+let filteredArtists = [...artists];
+
+const artistList = document.getElementById('artistList');
+const searchInput = document.getElementById('searchInput');
+const noResult = document.getElementById('noResult');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const loadingAnime = document.getElementById('loadingAnime');
+
+function renderArtists(){
+  artistList.innerHTML = '';
+  const start = (currentPage-1)*itemsPerPage;
+  const end = start + itemsPerPage;
+  const pageItems = filteredArtists.slice(start,end);
+  noResult.style.display = pageItems.length===0?'block':'none';
+
+  pageItems.forEach(name=>{
+    const li = document.createElement('li');
+    let link="https://dynofresh.github.io/submit/";
+    if(name==="Darna Gvnby") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="ABIL Tramaker") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="ALFIN FVNKY") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Ayuz Fvnky") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Bngnil Porects") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Darna Fvnky") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Derill Nine") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Febri DTM") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Ganz Neverdie") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="gfrxP") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="HAMX7TEEN") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="heyDarryl") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Hndra SOPAN") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Fany Carsello") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="i5vR Rmx") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="ILHAM RMX SG") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Ilham Sopan Rmx") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Ihzan Sopan") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="It'smefajar") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Itsme Ilham") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Iyanz`Wolf") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Shraa NeverDIE") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="SRVLR RMX") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="SUKAPARTY") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="XDYNZ") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="ZallETM") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Zan Fvnky Rmx") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="Zanrmx") link="https://dynofresh.github.io/avatarbulan/";
+    if(name==="ZANVIR") link="https://dynofresh.github.io/avatarbulan/";
+
+    const a=document.createElement('a');
+    a.textContent=name;
+    a.href=link;
+    a.addEventListener('click',(e)=>{
+      e.preventDefault();
+      loadingAnime.style.opacity='1';
+      loadingAnime.style.pointerEvents='all';
+      setTimeout(()=>{window.location.href=link;},700);
+    });
+    li.appendChild(a);
+    artistList.appendChild(li);
+  });
+
+  prevBtn.disabled=currentPage===1;
+  nextBtn.disabled=currentPage>=Math.ceil(filteredArtists.length/itemsPerPage);
+}
+
+let searchTimeout;
+searchInput.addEventListener('input',()=>{
+  clearTimeout(searchTimeout);
+  searchTimeout=setTimeout(()=>{
+    const query=searchInput.value.toLowerCase();
+    filteredArtists=artists.filter(a=>a.toLowerCase().includes(query));
+    currentPage=1;
+    renderArtists();
+  },150);
+});
+
+prevBtn.addEventListener('click',()=>{
+  if(currentPage>1){currentPage--;renderArtists();}
+});
+nextBtn.addEventListener('click',()=>{
+  if(currentPage<Math.ceil(filteredArtists.length/itemsPerPage)){currentPage++;renderArtists();}
+});
+
+// Sembunyikan loading saat halaman dimuat atau user kembali
+window.addEventListener('pageshow', () => {
+  loadingAnime.style.opacity = '0';
+  loadingAnime.style.pointerEvents = 'none';
+});
+
+renderArtists();
+</script>
+</body>
+</html>

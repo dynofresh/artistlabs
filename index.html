@@ -67,11 +67,6 @@ li:hover{
   background:rgba(255,255,255,0.2);
 }
 li a{text-decoration:none;color:#fff;width:100%;display:block;}
-li mark{
-  background:rgba(196,181,253,0.5);
-  border-radius:4px;
-  color:#fff;
-}
 .no-result{
   text-align:center;
   margin-top:20px;
@@ -192,28 +187,28 @@ function renderArtists(){
   noResult.style.display = pageItems.length===0?'block':'none';
 
   pageItems.forEach(name=>{
-    const li = document.createElement('li');
-    let link="https://dynofresh.github.io/DynoticMusic/";
-    if(name==="Darna Gvnby") link="artist6.html";
-    if(name==="ABIL Tramaker") link="artist1.html/";
+    let link = "#"; // default biar aman
+
+    if(name==="ABIL Tramaker") link="artist1.html";
     if(name==="ALFIN FVNKY") link="artist2.html";
     if(name==="Ayuz Fvnky") link="artist3.html";
     if(name==="Bngnil Porects") link="artist4.html";
-    if(name==="Darna Fvnky") link="artist4.html";
+    if(name==="Darna Fvnky") link="artist5.html";
+    if(name==="Darna Gvnby") link="artist6.html";
     if(name==="Derill Nine") link="artist7.html";
+    if(name==="Fany Carsello") link="artist8.html";
     if(name==="Febri DTM") link="artist9.html";
     if(name==="Ganz Neverdie") link="artist10.html";
     if(name==="gfrxP") link="artist11.html";
     if(name==="HAMX7TEEN") link="artist12.html";
     if(name==="heyDarryl") link="artist13.html";
     if(name==="Hndra SOPAN") link="artist14.html";
-    if(name==="Fany Carsello") link="artist8.html";
     if(name==="i5vR Rmx") link="artist15.html";
+    if(name==="Ihzan Sopan") link="artist16.html";
     if(name==="ILHAM RMX SG") link="artist17.html";
     if(name==="Ilham Sopan Rmx") link="artist18.html";
-    if(name==="Ihzan Sopan") link="artist16.html";
-    if(name==="It'smefajar") link="artist19.html";
-    if(name==="Itsme Ilham") link="artist20.html";
+    if(name==="Itsme Ilham") link="artist19.html";
+    if(name==="It'smefajar") link="artist20.html";
     if(name==="Iyanz`Wolf") link="artist21.html";
     if(name==="Shraa NeverDIE") link="artist22.html";
     if(name==="SRVLR RMX") link="artist23.html";
@@ -221,24 +216,27 @@ function renderArtists(){
     if(name==="XDYNZ") link="artist25.html";
     if(name==="ZallETM") link="artist26.html";
     if(name==="Zan Fvnky Rmx") link="artist27.html";
-    if(name==="Zanrmx") link="artist2.html";
+    if(name==="Zanrmx") link="artist28.html";
     if(name==="ZANVIR") link="artist29.html";
 
-    const a=document.createElement('a');
-    a.textContent=name;
-    a.href=link;
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.textContent = name;
+    a.href = link;
     a.addEventListener('click',(e)=>{
       e.preventDefault();
-      loadingAnime.style.opacity='1';
-      loadingAnime.style.pointerEvents='all';
-      setTimeout(()=>{window.location.href=link;},700);
+      if(link !== "#"){
+        loadingAnime.style.opacity='1';
+        loadingAnime.style.pointerEvents='all';
+        setTimeout(()=>{window.location.href=link;},700);
+      }
     });
     li.appendChild(a);
     artistList.appendChild(li);
   });
 
-  prevBtn.disabled=currentPage===1;
-  nextBtn.disabled=currentPage>=Math.ceil(filteredArtists.length/itemsPerPage);
+  prevBtn.disabled = currentPage===1;
+  nextBtn.disabled = currentPage>=Math.ceil(filteredArtists.length/itemsPerPage);
 }
 
 let searchTimeout;
@@ -259,7 +257,7 @@ nextBtn.addEventListener('click',()=>{
   if(currentPage<Math.ceil(filteredArtists.length/itemsPerPage)){currentPage++;renderArtists();}
 });
 
-// Sembunyikan loading saat halaman dimuat atau user kembali
+// Hilangkan animasi saat kembali ke halaman
 window.addEventListener('pageshow', () => {
   loadingAnime.style.opacity = '0';
   loadingAnime.style.pointerEvents = 'none';
